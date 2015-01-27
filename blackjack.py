@@ -1,58 +1,9 @@
 # Game of Blackjack
+# By Chris Berry
 
-# Simplified Rules (10 pts possible):
-# - Human player gets the first two cards
-# - Human player plays the rest of their hand
-# - Then computer gets next two cards
-# - Computer must take cards score  >= 17
-# - Computer must stand when score >= 17
-# - Aces always count as 11
-# - Human player loses if their score is > 21
-# - Computer loses if computer score is > 21
-# - Human player wins immediately if their score is exactly 21
-# - Computer wins immediately if their score is exactly 21
-# - If computer score is betwen 17 and 20, winner is determined by score
-# - If it's a tie, nobody wins.
-
-# Grading:
-# - 5 points for allowing a human user to play their complete hand
-# - 5 points for allowing the computer to play its hand
-
-# (Optional) Extras
-# [You don't get extra credit for these, but they're fun.]
-# - 1. Aces should count as 1 if counting as 11 would have made the score > 21
-# - 2. Initally, human and dealer both get two cards; one dealer card is face up
-# - 3. Allow the user to play as many games as they want
-# - 4. Dealing cards to the cmputer should have a dramatic, 4-second delay
-
-# Here's the psuedocode we wrote on the board in class:
-
-## Get a deck of cards
-
-## Shuffle the deck
-
-## Deal the first two cards to user
-
-## User can choose to take cards as long as score < 21
-
-## If user goes over 21, game is over.
-
-## If user reaches 21, game is over.
-
-## If user stands with less than 21, then it's the dealer's turn:
-
-##    Computer takes two cards
-##    Computer must take more cards while computer score < 17
-##    If computer score reached 21, computer wins.
-##    If computer score goes over 21, computer loses.
-##    If computer score is 17 to 20, winner is determined by higher score.
-
-
-
-
+# First bits of code are from class
 
 import random
-import time
 
 SUITS = "\u2663 \u2665 \u2666 \u2660".split()
 FACES = "A 2 3 4 5 6 7 8 9 10 J Q K".split()
@@ -62,8 +13,9 @@ for suit in SUITS:
   for face in FACES:
     deck.append(face+suit)
 
-random.shuffle(deck)
 
+# I stole the calculate function from you and modified it.
+# Everything else is mine
 def calculate_score(cards):
   value = 0
   for card in cards:
@@ -75,46 +27,53 @@ def calculate_score(cards):
     else:
       points = int(face)
     value += points
+  for card in cards:  #modified to treat aces appropriately
+    face = card[:-1]
+    if face=='A' and value>21:
+      value = value-10
   return value
 
-# Deal two cards
-hand = [deck.pop(0), deck.pop(0)]
-score = calculate_score(hand)
-
-print("Your hand:", " ".join(hand))
-
-while score < 21 and input("Do you want another card? (y/n) ") == 'y':
-  hand.append(deck.pop(0))
-  score = calculate_score(hand)
-  print("Your hand:", ", ".join(hand))
-
-if score > 21:
-  print("You're busted!")
-elif score == 21:
-  print("You win!")
-else:
-  print("You have %s points." % score)
-  print()
-  dealer_hand = [deck.pop(0), deck.pop(0)]
-  dealer_score = calculate_score(dealer_hand)
-  print("Dealer has", " ".join(dealer_hand))
-  while dealer_score < 17:
-    print("The dealer will take another card...")
-    time.sleep(5)
-    dealer_hand.append(deck.pop(0))
-    dealer_score = calculate_score(dealer_hand)
-    print("Dealer now has", " ".join(dealer_hand))
-    time.sleep(3)
-
-  if dealer_score > 21:
-    print("The dealer busted! You win!")
-  elif dealer_score == 21:
-    print("The dealer got 21! You lose.")
-  elif dealer_score > score:
-    print("You lost.")
-  elif dealer_score == score:
-    print("It's a tie.... nobody wins this time.")
+# The rest I wrote independently
+play="y"
+while play=="y":
+  random.shuffle(deck)
+  player_hand = deck[0:2]
+  dealer_hand = deck[2:4]
+  print("Your hand is",player_hand)
+  print("Dealer is showing",deck[3:4])
+  cardnum = 4
+  Xstr = input("Would you like another card (y/n)? ")
+  while Xstr == "y":
+    player_hand=player_hand+deck[cardnum:cardnum+1]
+    print(player_hand)
+    cardnum = cardnum + 1
+    Xstr = input("Would you like another card (y/n)? ")
+  print("Your hand is",player_hand)
+  player_score = calculate_score(player_hand)
+  print("Your total points are",player_score)
+  if player_score>21:
+    print("You Busted!")
+  elif player_score==21:
+    print("You Won!")
   else:
-    print("You win!")
+    print("Now it's the dealer's turn")
+    print("The dealer's hand is",dealer_hand)
+    dealer_score = calculate_score(dealer_hand)
+    while dealer_score < 17:
+      dealer_hand = dealer_hand+deck[cardnum:cardnum+1]
+      print(dealer_hand)
+      cardnum=cardnum+1
+      dealer_score = calculate_score(dealer_hand)
+    print("The dealer's score is",dealer_score)
+    if dealer_score==player_score:
+      print("Tie goes to the dealer. You lose.") # Vegas rules
+    elif dealer_score < player_score:
+      print("You win")
+    elif dealer_score>21:
+      print("Dealer busts. You win!")
+    else:
+      print("You lose")
+  play = input("Would you to play again (y/n)? ")
+
 
 
